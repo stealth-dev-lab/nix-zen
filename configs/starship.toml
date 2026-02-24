@@ -1,0 +1,127 @@
+# Starship prompt configuration
+# Rich style with more information
+
+# Overall format (2-line with time at the beginning)
+format = """
+[╭─](bold green)$time$username$hostname$directory$git_branch$git_status$git_commit
+[╰─](bold green)$nix_shell$python$nodejs$rust$golang$docker_context$package$cmd_duration$battery$character"""
+
+# Wait 10ms for starship to check files
+scan_timeout = 10
+
+# Username (always show)
+[username]
+show_always = true
+style_user = "bold yellow"
+format = "[$user]($style)@"
+
+# Hostname (always show)
+[hostname]
+ssh_only = false
+style = "bold green"
+format = "[$hostname]($style) in "
+
+# Directory display
+[directory]
+truncation_length = 4
+truncate_to_repo = false
+style = "bold cyan"
+format = "[$path]($style)[$read_only]($read_only_style) "
+read_only = " RO"
+
+# Git branch
+[git_branch]
+symbol = " "
+style = "bold purple"
+format = "on [$symbol$branch]($style) "
+
+# Git status (more detailed)
+[git_status]
+style = "bold yellow"
+format = "([\\[$all_status$ahead_behind\\]]($style) )"
+conflicted = "! "
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕${ahead_count}⇣${behind_count}"
+untracked = "?${count} "
+stashed = "S${count} "
+modified = "M${count} "
+staged = "+${count} "
+renamed = "R${count} "
+deleted = "D${count} "
+
+# Git commit hash
+[git_commit]
+tag_symbol = " tag "
+format = "[@ $hash$tag]($style) "
+style = "bold green"
+only_detached = true
+
+# Command duration (show if >= 500ms)
+[cmd_duration]
+min_time = 500
+style = "bold yellow"
+format = "took [$duration]($style) "
+
+# Character (prompt symbol)
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"
+
+# Nix shell indicator
+[nix_shell]
+symbol = "nix "
+style = "bold blue"
+format = "via [$symbol$state]($style) "
+
+# Language versions
+[python]
+symbol = "py "
+style = "bold yellow"
+format = "via [$symbol$pyenv_prefix($version )]($style)"
+
+[nodejs]
+symbol = "node "
+style = "bold green"
+format = "via [$symbol($version )]($style)"
+
+[rust]
+symbol = "rs "
+style = "bold red"
+format = "via [$symbol($version )]($style)"
+
+[golang]
+symbol = "go "
+style = "bold cyan"
+format = "via [$symbol($version )]($style)"
+
+[docker_context]
+symbol = "docker "
+style = "bold blue"
+format = "via [$symbol$context]($style) "
+
+# Package version
+[package]
+symbol = "pkg "
+style = "bold yellow"
+format = "via [$symbol$version]($style) "
+disabled = false
+
+# Battery (show when < 30%)
+[battery]
+full_symbol = "FULL"
+charging_symbol = "CHG"
+discharging_symbol = "LOW"
+disabled = false
+
+[[battery.display]]
+threshold = 30
+style = "bold red"
+
+# Time (always show)
+[time]
+disabled = false
+style = "bold white"
+format = "at [$time]($style) "
+time_format = "%H:%M:%S"
