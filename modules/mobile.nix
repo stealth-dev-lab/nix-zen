@@ -6,7 +6,7 @@
   home.packages = with pkgs; [
     zsh-completions
     zoxide        # Smart cd command
-    zsh-fzf-tab   # fzf-powered tab completion
+    # zsh-fzf-tab disabled due to GLIBC compatibility issues
   ];
 
   programs.zsh = {
@@ -62,11 +62,6 @@
     };
 
     initContent = ''
-      # fzf-tab for better completion
-      if [[ -f ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh ]]; then
-        source ${pkgs.zsh-fzf-tab}/share/fzf-tab/fzf-tab.plugin.zsh
-      fi
-
       # History settings for quick recall
       HISTSIZE=10000
       SAVEHIST=10000
