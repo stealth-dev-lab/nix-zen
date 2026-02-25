@@ -61,6 +61,7 @@
     defaultUser = {
       linux = { username = "dev-user"; homeDirectory = "/home/dev-user"; };
       darwin = { username = "user"; homeDirectory = "/Users/user"; };
+      container = { username = "root"; homeDirectory = "/root"; };
     };
   in {
     homeConfigurations = {
@@ -90,6 +91,22 @@
         system = "aarch64-darwin";
         profile = ./profiles/minimal.nix;
         inherit (defaultUser.darwin) username homeDirectory;
+      };
+
+      # Container profile - For testing in containers (runs as root)
+      # Usage: home-manager switch --flake .#container
+      container = home-manager.lib.homeManagerConfiguration {
+        pkgs = import nixpkgs { system = "x86_64-linux"; };
+        modules = [
+          ./profiles/minimal.nix
+          ({ lib, ... }: {
+            home.username = "root";
+            home.homeDirectory = "/root";
+            home.stateVersion = "23.11";
+            programs.home-manager.enable = true;
+            # Skip config symlinks in container
+          })
+        ];
       };
     };
   };
