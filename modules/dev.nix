@@ -52,7 +52,7 @@
       mkdir -p "$NPM_PREFIX"
       "$NPM_BIN" config set prefix "$NPM_PREFIX" >/dev/null 2>&1
 
-      for pkg in @anthropic-ai/claude-code; do
+      for pkg in @anthropic-ai/claude-code @openai/codex @google/gemini-cli; do
         if ! "$NPM_BIN" list -g --depth=0 "$pkg" >/dev/null 2>&1; then
           echo "Installing $pkg via npm..."
           "$NPM_BIN" install -g "$pkg" || true

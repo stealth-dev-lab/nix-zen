@@ -9,52 +9,36 @@
     };
   };
 
-  outputs = { nixpkgs, home-manager, ... }:
+  outputs = { self, nixpkgs, home-manager, ... }:
   let
+    # Path to nix-zen root (for config files)
+    nixZenPath = self.outPath;
+
     # Helper function to create home-manager configuration
-    mkHome = { system, profile, username, homeDirectory }:
+    mkHome = { system, profile, username, homeDirectory, includeConfigs ? true }:
       let
         pkgs = import nixpkgs { inherit system; };
+        lib = pkgs.lib;
       in
       home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
+        extraSpecialArgs = { inherit nixZenPath; };
         modules = [
           # Import the selected profile
           profile
 
           # Base configuration
-          ({ lib, ... }: {
+          {
             home.username = username;
             home.homeDirectory = homeDirectory;
             home.stateVersion = "23.11";
 
             # Let Home Manager manage itself
             programs.home-manager.enable = true;
-
-            # Symlink configs from nix-zen/configs/
-            home.activation.linkConfigs = lib.hm.dag.entryAfter ["writeBoundary"] ''
-              NIX_ZEN_DIR="$HOME/work/stealth-dev-lab/nix-zen"
-
-              # nvim config
-              if [ -d "$NIX_ZEN_DIR/configs/nvim" ] && [ ! -e "$HOME/.config/nvim" ]; then
-                echo "Linking nvim config..."
-                ln -sfn "$NIX_ZEN_DIR/configs/nvim" "$HOME/.config/nvim"
-              fi
-
-              # tmux config
-              mkdir -p "$HOME/.config/tmux"
-              if [ -f "$NIX_ZEN_DIR/configs/tmux/tmux.conf" ] && [ ! -e "$HOME/.config/tmux/tmux.conf" ]; then
-                echo "Linking tmux config..."
-                ln -sfn "$NIX_ZEN_DIR/configs/tmux/tmux.conf" "$HOME/.config/tmux/tmux.conf"
-              fi
-
-              # starship config
-              if [ -f "$NIX_ZEN_DIR/configs/starship.toml" ] && [ ! -e "$HOME/.config/starship.toml" ]; then
-                echo "Linking starship config..."
-                ln -sfn "$NIX_ZEN_DIR/configs/starship.toml" "$HOME/.config/starship.toml"
-              fi
-            '';
-          })
+          }
+        ] ++ lib.optionals includeConfigs [
+          # Config files management (nvim, tmux, starship)
+          ./modules/configs.nix
         ];
       };
     # Default user config (override via extraSpecialArgs if needed)
@@ -95,18 +79,20 @@
 
       # Container profile - For testing in containers (runs as root)
       # Usage: home-manager switch --flake .#container
-      container = home-manager.lib.homeManagerConfiguration {
-        pkgs = import nixpkgs { system = "x86_64-linux"; };
-        modules = [
-          ./profiles/minimal.nix
-          ({ lib, ... }: {
-            home.username = "root";
-            home.homeDirectory = "/root";
-            home.stateVersion = "23.11";
-            programs.home-manager.enable = true;
-            # Skip config symlinks in container
-          })
-        ];
+      container = mkHome {
+        system = "x86_64-linux";
+        profile = ./profiles/minimal.nix;
+        inherit (defaultUser.container) username homeDirectory;
+        includeConfigs = false;  # Skip config files in container
+      };
+
+      # Container profile with configs - For full testing in containers
+      # Usage: home-manager switch --flake .#container-full
+      container-full = mkHome {
+        system = "x86_64-linux";
+        profile = ./profiles/full.nix;
+        inherit (defaultUser.container) username homeDirectory;
+        includeConfigs = true;  # Include config files
       };
     };
   };
