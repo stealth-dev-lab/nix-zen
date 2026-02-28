@@ -8,9 +8,42 @@ Nix 初心者にも使いやすい、軽量な開発環境管理ツール。
 - 🧹 ホスト環境を汚さない
 - 📱 モバイル (SSH) 向け最適化オプション
 
-## クイックスタート (5分)
+## お試し（コンテナ）
 
-### 1. Nix インストール
+インストール前に試してみたい場合:
+
+```bash
+# Docker
+docker run -it --rm ghcr.io/stealth-dev-lab/nix-zen
+
+# Podman
+podman run -it --rm ghcr.io/stealth-dev-lab/nix-zen
+```
+
+→ zsh + starship + neovim + tmux + aliases を即体験
+→ 気に入らなければ `exit` で終了、痕跡なし
+
+## インストール
+
+### ワンライナー（推奨）
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/stealth-dev-lab/nix-zen/main/install.sh | sh
+```
+
+以下を自動で行います:
+1. Nix のインストール（未インストールの場合）
+2. Flakes の有効化
+3. プロファイル選択（full / minimal）
+4. 既存 dotfiles のバックアップ
+5. 環境の適用
+
+### 手動インストール
+
+<details>
+<summary>手動で行う場合はこちら</summary>
+
+#### 1. Nix インストール
 
 ```bash
 curl --proto '=https' --tlsv1.2 -sSf -L \
@@ -19,12 +52,12 @@ curl --proto '=https' --tlsv1.2 -sSf -L \
 
 ターミナルを再起動（または `source /etc/profile`）。
 
-### 2. nix-zen 適用
+#### 2. nix-zen 適用
 
 ```bash
 # リポジトリ取得
-git clone https://github.com/stealth-dev-lab/nix-zen.git
-cd nix-zen
+git clone https://github.com/stealth-dev-lab/nix-zen.git ~/.nix-zen
+cd ~/.nix-zen
 
 # 環境を適用 (Linux)
 nix run nixpkgs#home-manager -- switch --flake .#full-linux
@@ -33,21 +66,29 @@ nix run nixpkgs#home-manager -- switch --flake .#full-linux
 nix run nixpkgs#home-manager -- switch --flake .#full-mac
 ```
 
-### 3. 完了
+#### 3. 完了
 
 新しいターミナルを開くと環境が適用されています。
 
-## 困ったら
+</details>
+
+## 管理コマンド
 
 ```bash
+# 再適用
+home-manager switch --flake ~/.nix-zen#full-linux
+
 # 前の状態に戻す
 home-manager rollback
 
 # 世代一覧を見る
 home-manager generations
 
-# nix-zen を無効化
+# nix-zen を無効化（Nix は残る）
 home-manager uninstall
+
+# アンインストール
+curl -fsSL https://raw.githubusercontent.com/stealth-dev-lab/nix-zen/main/install.sh | sh -s -- --uninstall
 ```
 
 詳細: [docs/uninstall.md](docs/uninstall.md)
@@ -79,6 +120,7 @@ home-manager uninstall
 ```
 nix-zen/
 ├── flake.nix          # エントリーポイント
+├── install.sh         # ワンライナーインストーラー
 ├── modules/           # 機能モジュール
 │   ├── core.nix      # 基本パッケージ
 │   ├── dev.nix       # 開発ツール
